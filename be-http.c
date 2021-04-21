@@ -196,6 +196,11 @@ static int http_post(void *handle, char *uri, const char *clientid, const char *
 	curl_easy_setopt(curl, CURLOPT_PASSWORD, password);
 	curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10);
 
+	if (conf->tls_dont_verify) {
+		curl_easy_setopt(curl,CURLOPT_SSL_VERIFYPEER,0);
+		curl_easy_setopt(curl,CURLOPT_SSL_VERIFYHOST,0);
+	} 
+
 	re = curl_easy_perform(curl);
 	if (re == CURLE_OK) {
 		re = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &respCode);
@@ -281,6 +286,8 @@ void *be_http_init()
 	} else {
 		conf->with_tls = "false";
 	}
+
+	conf->tls_dont_verify=p_stab("http_tls_dont_verify");
 
 	conf->retry_count = p_stab("http_retry_count") == NULL ? 3 : atoi(p_stab("http_retry_count"));
 
